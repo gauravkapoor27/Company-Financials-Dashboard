@@ -1,0 +1,4 @@
+client/node_modules/
+venv/
+flask-server/__pycache__/server.cpython-311.pyc
+flask-server/__pycache__/test_routes.cpython-311.pyc
