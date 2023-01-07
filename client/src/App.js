@@ -1,5 +1,5 @@
 import "./assets/css/App.css";
-import { useRef, useState, useLayoutEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { createChart, CrosshairMode } from "lightweight-charts";
 import Select from "react-select";
 
@@ -7,10 +7,11 @@ function App() {
   const [data, setData] = useState(null);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const shortDescription = useRef(null);
-  const [ticker, setTicker] = useState("AAPL");
+  const [ticker, setTicker] = useState();
 
   const chartContainerRef = useRef();
   const priceSeries = useRef();
+  const companies = useRef();
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -88,10 +89,16 @@ function App() {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    fetchData(ticker);
-    fetchHistoricalData(ticker);
-  }, [ticker, data]);
+  useEffect(() => {
+    if (ticker) {
+      fetchData(ticker);
+      fetchHistoricalData(ticker);
+    } else {
+      fetchData("AAPL");
+      fetchHistoricalData("AAPL");
+    }
+    console.log("useEffect ran");
+  }, [ticker]);
 
   const fetchData = (ticker) => {
     fetch(`http://localhost:5555/${ticker}`)
@@ -115,6 +122,16 @@ function App() {
         priceSeries.current.setData(next);
       });
   };
+
+  const fetchCompanyList = () => {
+    fetch(`http://localhost:5555/companies`)
+      .then((res) => res.json())
+      .then((data) => {
+        companies.current = data;
+      });
+  };
+
+  fetchCompanyList();
 
   return (
     <>
@@ -140,15 +157,13 @@ function App() {
               }}
               className="ticker-select"
               type="text"
-              value={{ label: "Search for ticker...", value: 0 }}
-              options={[
-                { value: "AAPL", label: "Apple" },
-                { value: "MSFT", label: "Microsoft" },
-                { value: "AMZN", label: "Amazon" },
-                { value: "GOOG", label: "Google" },
-              ]}
+              value={{ label: "Search for a stock...", value: 0 }}
+              options={companies.current}
               onChange={(e) => {
                 setTicker(e.value);
+                fetchData(e.value);
+                fetchHistoricalData(e.value);
+                setData(null);
               }}
             />
             <div className="main-title">
@@ -157,21 +172,18 @@ function App() {
                 alt=""
                 className="ticker-logo"
                 style={{
-                  width: "40px",
-                  borderRadius: "50%",
+                  height: "40px",
+                  borderRadius: "10%",
+                  margin: "3px",
                   border: "none",
                 }}
               />
               <h1 className="ticker-heading">
                 {data.shortName} ({data.symbol}) |{" "}
-                {data.regularMarketPrice > data.regularMarketPreviousClose ? (
-                  <span style={{ color: "green" }}>
-                    ${data.regularMarketPrice}
-                  </span>
+                {data.currentPrice > data.previousClose ? (
+                  <span style={{ color: "green" }}>${data.currentPrice}</span>
                 ) : (
-                  <span style={{ color: "red" }}>
-                    ${data.regularMarketPrice}
-                  </span>
+                  <span style={{ color: "red" }}>${data.currentPrice}</span>
                 )}
               </h1>
             </div>
@@ -289,7 +301,11 @@ function App() {
               <h2>Financial Information</h2>
               <div className="financial-info-item">
                 <h3>Total Revenue</h3>
-                <p>${data.totalRevenue.toLocaleString()}</p>
+                <p>
+                  {data.totalRevenue
+                    ? `$${data.totalRevenue.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Revenue Growth</h3>
@@ -297,7 +313,11 @@ function App() {
               </div>
               <div className="financial-info-item">
                 <h3>Net Income</h3>
-                <p>${data.netIncomeToCommon.toLocaleString()}</p>
+                <p>
+                  {data.netIncomeToCommon
+                    ? `$${data.netIncomeToCommon.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Return on Equity</h3>
@@ -309,19 +329,31 @@ function App() {
               </div>
               <div className="financial-info-item">
                 <h3>Debt-to-Equity Ratio</h3>
-                <p>{data.debtToEquity}</p>
+                <p>{data.debtToEquity ? data.debtToEquity : "N/A"}</p>
               </div>
               <div className="financial-info-item">
                 <h3>Total Debt</h3>
-                <p>${data.totalDebt.toLocaleString()}</p>
+                <p>
+                  {data.totalDebt
+                    ? `$${data.totalDebt.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Operating Cash Flow</h3>
-                <p>${data.operatingCashflow.toLocaleString()}</p>
+                <p>
+                  {data.operatingCashflow
+                    ? `$${data.operatingCashflow.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Free Cash Flow</h3>
-                <p>${data.freeCashflow.toLocaleString()}</p>
+                <p>
+                  {data.freeCashflow
+                    ? `$${data.freeCashflow.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Price-to-Earnings Ratio</h3>
@@ -333,15 +365,27 @@ function App() {
               </div>
               <div className="financial-info-item">
                 <h3>Shares Outstanding</h3>
-                <p>{data.sharesOutstanding.toLocaleString()}</p>
+                <p>
+                  {data.sharesOutstanding
+                    ? `$${data.sharesOutstanding.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Float</h3>
-                <p>{data.floatShares.toLocaleString()}</p>
+                <p>
+                  {data.floatShares
+                    ? `$${data.floatShares.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
               <div className="financial-info-item">
                 <h3>Full-Time Employees</h3>
-                <p>{data.fullTimeEmployees.toLocaleString()}</p>
+                <p>
+                  {data.fullTimeEmployees
+                    ? `$${data.fullTimeEmployees.toLocaleString()}`
+                    : "N/A"}
+                </p>
               </div>
             </>
           ) : (

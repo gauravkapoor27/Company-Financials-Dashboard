@@ -1,19 +1,21 @@
 from flask import Flask, make_response
 import yfinance as yf
+import pandas as pd
 import json
 
 app = Flask(__name__)
 
-selectedFields = ["symbol", "shortName", "sector", "longBusinessSummary", "logo_url", "website",
-                  "industry", "currentPrice", "volume", "beta", "targetHighPrice", "targetLowPrice",
-                  "52WeekChange", "fiftyTwoWeekHigh", "fiftyTwoWeekLow", "fiftyDayAverage",
-                  "twoHundredDayAverage", "marketCap", "dividendRate", "exDividendDate",
-                  "lastDividendValue", "fiveYearAvgDividendYield",
-                  "totalRevenue", "revenueGrowth", "netIncomeToCommon",
-                  "returnOnAssets", "returnOnEquity", "debtToEquity", "totalDebt",
-                  "operatingCashflow", "freeCashflow", "trailingPE",
-                  "trailingEps", "sharesOutstanding", "floatShares",
-                  "fullTimeEmployees"]
+df = pd.read_html(
+    "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]
+df = df[['Symbol', 'Security']]
+
+companies = [{'value': df['Symbol'][x], 'label': df['Security'][x]}
+             for x in range(len(df))]
+
+
+@app.route('/companies')
+def companyList():
+    return companies, {'Access-Control-Allow-Origin': '*'}
 
 
 @app.route('/<ticker>')
