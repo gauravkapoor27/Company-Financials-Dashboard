@@ -87,7 +87,7 @@ body {
 .price-info {
   height: 100%;
   text-align: center;
-  min-width: 500px;
+  min-width: 300px;
 }
 
 .price-info h2 {
@@ -104,7 +104,7 @@ body {
 .financial-info {
   height: 100%;
   text-align: center;
-  min-width: 500px;
+  min-width: 300px;
 }
 
 .financial-info h2 {
