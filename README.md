@@ -22,9 +22,11 @@ that is both informative and easy to use.
 
 ## Selecting Ticker
 By selecting from dropdown:
+
 ![select_update](https://user-images.githubusercontent.com/96806035/211184321-a5f5b31c-4c7d-470e-bcfa-5c2efd9d5853.gif)
 
-By Typing Company Name or Ticker Symbol:
+By typing company name or ticker symbol:
+
 ![type_update](https://user-images.githubusercontent.com/96806035/211184325-dd150d7d-03f6-49ae-8c25-19ccb0b70b14.gif)
 
 
